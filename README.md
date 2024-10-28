@@ -19,6 +19,8 @@ This feature would allow a chain of counter operations to be specified prior to 
 
 The 7 segment display on the tag can only display numerical values from 0-99. If a value is larger than 99 the tag will display oF indicating an overflow. Players will only know that that value is larger than 99 by looking at the tag. To see the exact value the phone can be tapped to the tag and the actual value will be displayed on the phone. These values could also be stored along with the card name if desired for easy access without needing to tap the phone to the tag.
 
+![oF-phone](https://github.com/user-attachments/assets/116c31b3-7aad-4ab9-a167-19b345e73ca3)
+
 ### Tracking
 
 - counter instances
