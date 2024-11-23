@@ -40,7 +40,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   bool _tagDetected = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -50,9 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       if (detected) {
+        print("tag detected");
         Vibration.vibrate(duration: 200);
+        // wait to make sure good connection
+        _upload();
       } else {
-        Vibration.vibrate(pattern: [200, 200, 200, 200]);
+        //Vibration.vibrate(pattern: [200, 200, 200, 200]);
       }
     });
   }
@@ -83,9 +85,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _doubleCounter() {
     setState(() {
-      _counter*=2;
+      _counter *= 2;
     });
   }
+
+  Future<void> _upload() async {
+    List<int> cmd_custom = [0x02, 0xAA, 0x07, 0x00];
+
+    // wait a bit to ensure in range
+    await Future.delayed(const Duration(milliseconds: 50));
+    cmd_custom[3] = _counter;
+    List<int>? response = await NFCManager.sendNfcVCommand(cmd_custom);
+    print(response);
+    await Future.delayed(const Duration(milliseconds: 1600));
+    Vibration.vibrate(pattern: [200, 200, 200, 200]);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: _resetCounter,
               tooltip: 'Reset',
               child: Icon(Icons.refresh),
+            ),
+            SizedBox(width: 8),
+            FloatingActionButton(
+              onPressed: _upload,
+              tooltip: 'Upload',
+              child: Icon(Icons.upload),
             ),
             SizedBox(width: 8),
             FloatingActionButton.extended(

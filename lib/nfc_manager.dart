@@ -24,6 +24,16 @@ class NFCManager {
     }
   }
 
+  static Future<List<int>?> sendNfcVCommand(List<int> command) async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod('sendNfcVCommand', {'command': command});
+      return result.cast<int>();
+    } catch (e) {
+      print('Error sending NfcV command: $e');
+      return null;
+    }
+  }
+
   static void dispose() {
     _nfcStreamController.close();
   }

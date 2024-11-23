@@ -15,6 +15,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+import kotlinx.coroutines.*
+
 class MainActivity : FlutterActivity(), NfcAdapter.ReaderCallback {
 
     private val CHANNEL = "nfc_channel"
@@ -27,7 +29,47 @@ class MainActivity : FlutterActivity(), NfcAdapter.ReaderCallback {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+
+        // Set the method call handler
+        methodChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "sendNfcVCommand" -> {
+                    val args = call.arguments as Map<String, Any>
+                    val commandList = args["command"] as List<Int>
+                    sendNfcVCommand(commandList, result)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
+
+    private fun sendNfcVCommand(commandList: List<Int>, result: MethodChannel.Result) {
+        if (nfcV == null || !nfcV!!.isConnected) {
+            result.error("NOT_CONNECTED", "NFCV tag is not connected", null)
+            return
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val commandBytes = ByteArray(commandList.size)
+            for (i in commandList.indices) {
+                commandBytes[i] = commandList[i].toByte()
+            }
+
+            try {
+                val responseBytes = nfcV!!.transceive(commandBytes)
+                val responseList = responseBytes.map { it.toInt() and 0xFF }
+                withContext(Dispatchers.Main) {
+                    result.success(responseList)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    result.error("IO_EXCEPTION", "Error communicating with NFCV tag: ${e.localizedMessage}", null)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
