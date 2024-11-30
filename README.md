@@ -11,6 +11,10 @@ Smartphone app for updating counter value on TCG counter
 - clear
 - undo
 
+### New Game / App Restart
+
+When the app is first started, it will not be tracking any TCG Counters. When a TCG Counter is in range for the first time, the user will be given the option to enter a name for tracking the device in the app. It is expected that this would be the card name the counter is on to make it easy to switch between the app and the board state. Each TCG Counter added would be displayed in a list with the given name and counter value.
+
 ### Multiple TCG Counter Device Tracking
 
 This feature will allow counter values from multiple TCG Counter hardware devices to be tracked together. This would be especially useful for effects like proliferate or doubling counters on all creatures, etc. A single update could be made one time in the app to update all counter values and then the phone could be tapped to each device to update the displayed value. Each TCG Counter device has a unique id that can be used to create a hashmap with keys composed of the device ids and a counter object including the current value, card name, etc. as the map values. 
